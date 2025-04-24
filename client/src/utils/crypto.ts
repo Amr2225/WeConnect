@@ -1,6 +1,6 @@
 import CryptoJS from 'crypto-js';
 
-const ENCRYPTION_KEY = import.meta.env.VITE_ENCRYPTION_KEY || 'your-encryption-key';
+const ENCRYPTION_KEY = import.meta.env.VITE_POST_ENCRYPTION_KEY;
 
 export const decryptContent = (encryptedContent: string): string => {
     try {
@@ -12,11 +12,11 @@ export const decryptContent = (encryptedContent: string): string => {
     }
 };
 
-export const encryptContent = (content: string): string => {
-    try {
-        return CryptoJS.AES.encrypt(content, ENCRYPTION_KEY).toString();
-    } catch (error) {
-        console.error('Failed to encrypt content:', error);
-        return content;
-    }
-}; 
+// export const encryptContent = (content: string): string => {
+//     try {
+//         return CryptoJS.AES.encrypt(content, ENCRYPTION_KEY).toString();
+//     } catch (error) {
+//         console.error('Failed to encrypt content:', error);
+//         return content;
+//     }
+// }; 

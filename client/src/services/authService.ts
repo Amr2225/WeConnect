@@ -39,7 +39,7 @@ export const register = async (credentials: RegisterCredentials): Promise<AuthRe
 
 export const updateProfile = async (formData: FormData): Promise<User> => {
     try {
-        const response = await api.patch('/api/users/me', formData, {
+        const response = await api.patch('users/me', formData, {
             headers: {
                 'Content-Type': 'application/json',
             },

@@ -1,9 +1,8 @@
-import axios from 'axios';
 import { AuthResponse, LoginCredentials, RegisterCredentials, UpdateProfileData, Post } from '../types';
 import { refreshToken } from './authService';
-import { redirect } from 'react-router-dom';
+import axios from 'axios';
 
-const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const baseURL = import.meta.env.VITE_API_URL;
 
 export const api = axios.create({
     baseURL,
@@ -40,7 +39,7 @@ api.interceptors.response.use(
             } catch (error) {
                 // If refresh token fails, redirect to login
                 console.log("Refresh Token Expired")
-                redirect('/login')
+                window.location.href = '/login';
                 return Promise.reject(error);
             }
         }
