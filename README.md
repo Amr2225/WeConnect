@@ -1,4 +1,4 @@
-# Simple Social Media App
+# WeConnect
 
 A fullstack social media application built with React, Express, TypeScript, and Tailwind CSS.
 
