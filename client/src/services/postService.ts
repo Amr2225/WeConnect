@@ -6,7 +6,7 @@ export const getPosts = async (): Promise<Post[]> => {
     const response = await api.get<Post[]>('/posts');
     return response.data.map(post => ({
         ...post,
-        content: post.encryptedContent ? decryptContent(post.encryptedContent) : post.content
+        content: post.content ? decryptContent(post.content) : post.content
     }));
 };
 
@@ -14,7 +14,7 @@ export const createPost = async (data: CreatePostData): Promise<Post> => {
     const response = await api.post<Post>('/posts', data);
     return {
         ...response.data,
-        content: response.data.encryptedContent ? decryptContent(response.data.encryptedContent) : response.data.content
+        content: response.data.content ? decryptContent(response.data.content) : response.data.content
     };
 };
 
@@ -22,7 +22,7 @@ export const likePost = async (postId: string): Promise<Post> => {
     const response = await api.post<Post>(`/posts/${postId}/like`);
     return {
         ...response.data,
-        content: response.data.encryptedContent ? decryptContent(response.data.encryptedContent) : response.data.content
+        content: response.data.content ? decryptContent(response.data.content) : response.data.content
     };
 };
 

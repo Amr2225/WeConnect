@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useAuth } from "../contexts/AuthContext";
+import { useAuth } from "../contexts/useAuth";
 import { createPost } from "../services/postService";
 import { compressImage, validateImage, createFormDataWithImages } from "../utils/imageUpload";
 import { CreatePostData } from "../types";

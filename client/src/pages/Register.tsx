@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { useAuth } from "../contexts/AuthContext";
+import { useAuth } from "../contexts/useAuth";
 
 export default function Register() {
   const [name, setName] = useState("");
@@ -15,7 +15,7 @@ export default function Register() {
     try {
       await register({ name, email, password });
       navigate("/");
-    } catch (error) {
+    } catch {
       setError("Registration failed. Please try again.");
     }
   };

@@ -1,64 +1,29 @@
-import { useState, useEffect, useMemo } from "react";
-import { useAuth } from "../contexts/AuthContext";
+import { useState } from "react";
+import { useAuth } from "../contexts/useAuth";
 import { useNavigate } from "react-router-dom";
 import { updateProfile } from "../services/authService";
-import { compressImage, validateImage, createFormDataWithImages } from "../utils/imageUpload";
-import { UpdateProfileData } from "../types";
+import { useMutation } from "@tanstack/react-query";
+// import { UpdateProfileData } from "../types";
 
 const Profile = () => {
-  const { user, updateUser } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [profilePicture, setProfilePicture] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    if (user) {
-      setName(user.displayName);
-      setEmail(user.email);
-      setPreviewUrl(user.photoURL);
-    }
-  }, [user]);
+  const [name, setName] = useState(user?.name);
+  const [email, setEmail] = useState(user?.email);
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    try {
-      validateImage(file);
-      const compressedFile = await compressImage(file);
-      setProfilePicture(compressedFile);
-      setPreviewUrl(URL.createObjectURL(compressedFile));
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to process image");
-    }
-  };
+  const { mutate: updateProfileMutation, isPending } = useMutation({
+    mutationFn: (formData: FormData) => updateProfile(formData),
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
-    setLoading(true);
+    const formData = new FormData();
+    formData.append("name", name);
+    formData.append("email", email);
 
-    try {
-      const formData = new FormData();
-      formData.append("name", name);
-      formData.append("email", email);
-
-      if (profilePicture) {
-        formData.append("profilePicture", profilePicture);
-      }
-
-      const updatedUser = await updateProfile(formData);
-      updateUser(updatedUser);
-      navigate("/");
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to update profile");
-    } finally {
-      setLoading(false);
-    }
+    updateProfileMutation(formData);
+    navigate("/");
   };
 
   if (!user) {
@@ -71,28 +36,7 @@ const Profile = () => {
       <form onSubmit={handleSubmit} className='space-y-4'>
         <div>
           <label className='block text-sm font-medium text-gray-700'>Profile Picture</label>
-          <div className='mt-2 flex items-center space-x-4'>
-            <div className='w-20 h-20 rounded-full overflow-hidden'>
-              {previewUrl ? (
-                <img src={previewUrl} alt='Profile' className='w-full h-full object-cover' />
-              ) : (
-                <div className='w-full h-full bg-gray-200 flex items-center justify-center'>
-                  <span className='text-gray-500'>No image</span>
-                </div>
-              )}
-            </div>
-            <input
-              type='file'
-              accept='image/*'
-              onChange={handleFileChange}
-              className='block w-full text-sm text-gray-500
-                                file:mr-4 file:py-2 file:px-4
-                                file:rounded-full file:border-0
-                                file:text-sm file:font-semibold
-                                file:bg-violet-50 file:text-violet-700
-                                hover:file:bg-violet-100'
-            />
-          </div>
+          <div className='mt-2 flex items-center space-x-4'></div>
         </div>
 
         <div>
@@ -115,14 +59,14 @@ const Profile = () => {
           />
         </div>
 
-        {error && <div className='text-red-500 text-sm'>{error}</div>}
+        {/* {error && <div className='text-red-500 text-sm'>{error}</div>} */}
 
         <button
           type='submit'
-          disabled={loading}
-          className='w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-violet-600 hover:bg-violet-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-violet-500 disabled:opacity-50'
+          disabled={isPending}
+          className='w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-offset-2  disabled:opacity-50'
         >
-          {loading ? "Updating..." : "Update Profile"}
+          {isPending ? "Updating..." : "Update Profile"}
         </button>
       </form>
     </div>

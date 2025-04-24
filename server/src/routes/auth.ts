@@ -1,7 +1,8 @@
 import express, { Request, Response } from 'express';
-import User from '../models/User';
-import { generateTokens, UserRequest } from '../middleware/auth';
 import jwt from 'jsonwebtoken';
+import { UserRequest } from '../middleware/auth';
+import { generateTokens } from '../utils/generateToken';
+import User from '../models/User';
 
 const router = express.Router();
 
@@ -28,10 +29,9 @@ router.post('/register', async (req: UserRequest, res: Response) => {
 
         res.status(201).json({
             user: {
-                id: user._id,
+                _id: user._id,
                 email: user.email,
                 name: user.name,
-                profilePicture: user.profilePicture
             },
             ...tokens
         });
@@ -54,10 +54,9 @@ router.post('/login', async (req: UserRequest, res: Response) => {
 
         res.json({
             user: {
-                id: user._id,
+                _id: user._id,
                 email: user.email,
                 name: user.name,
-                profilePicture: user.profilePicture
             },
             ...tokens
         });

@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { AuthResponse, LoginCredentials, RegisterCredentials, UpdateProfileData, Post } from '../types';
 import { refreshToken } from './authService';
+import { redirect } from 'react-router-dom';
 
 const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
@@ -14,7 +15,7 @@ export const api = axios.create({
 
 // Add a request interceptor to add the auth token to requests
 api.interceptors.request.use((config) => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('accessToken');
     if (token) {
         config.headers.Authorization = `Bearer ${token}`;
     }
@@ -32,12 +33,14 @@ api.interceptors.response.use(
             originalRequest._retry = true;
 
             try {
+                console.log("Getting new access token")
                 const { accessToken } = await refreshToken();
                 originalRequest.headers.Authorization = `Bearer ${accessToken}`;
                 return api(originalRequest);
             } catch (error) {
                 // If refresh token fails, redirect to login
-                window.location.href = '/login';
+                console.log("Refresh Token Expired")
+                redirect('/login')
                 return Promise.reject(error);
             }
         }

@@ -5,11 +5,6 @@ import axios from 'axios';
 export const login = async (credentials: LoginCredentials): Promise<AuthResponse> => {
     try {
         const response = await api.post<AuthResponse>('/auth/login', credentials);
-        const { accessToken, refreshToken } = response.data;
-
-        // Store tokens
-        localStorage.setItem('token', accessToken);
-        localStorage.setItem('refreshToken', refreshToken);
 
         return response.data;
     } catch (error) {
@@ -27,21 +22,11 @@ export const register = async (credentials: RegisterCredentials): Promise<AuthRe
         formData.append('email', credentials.email);
         formData.append('password', credentials.password);
 
-        if (credentials.profilePicture) {
-            formData.append('profilePicture', credentials.profilePicture);
-        }
-
         const response = await api.post<AuthResponse>('/auth/register', formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
             },
         });
-
-        const { accessToken, refreshToken } = response.data;
-
-        // Store tokens
-        localStorage.setItem('token', accessToken);
-        localStorage.setItem('refreshToken', refreshToken);
 
         return response.data;
     } catch (error) {
@@ -56,7 +41,7 @@ export const updateProfile = async (formData: FormData): Promise<User> => {
     try {
         const response = await api.patch('/api/users/me', formData, {
             headers: {
-                'Content-Type': 'multipart/form-data',
+                'Content-Type': 'application/json',
             },
         });
         return response.data;
@@ -76,10 +61,10 @@ export const refreshToken = async (): Promise<{ accessToken: string }> => {
             throw new Error('No refresh token found');
         }
 
-        const response = await api.post<{ accessToken: string }>('/auth/refresh', { refreshToken });
+        const response = await axios.post<{ accessToken: string }>(`http://localhost:5000/api/auth/refresh`, { refreshToken });
         const { accessToken } = response.data;
 
-        localStorage.setItem('token', accessToken);
+        localStorage.setItem('accessToken', accessToken);
         return { accessToken };
     } catch (error) {
         if (axios.isAxiosError(error)) {

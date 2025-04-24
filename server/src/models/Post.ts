@@ -1,17 +1,18 @@
 import mongoose from 'mongoose';
 import crypto from 'crypto-js';
+import { config } from 'dotenv';
+config();
 
-const ENCRYPTION_KEY = process.env.POST_ENCRYPTION_KEY || 'your-encryption-key';
+if (!process.env.POST_ENCRYPTION_KEY) throw new Error('POST_ENCRYPTION_KEY is not defined in the environment variables');
+const ENCRYPTION_KEY = process.env.POST_ENCRYPTION_KEY
 
 export interface IPost extends mongoose.Document {
     content: string;
     author: mongoose.Types.ObjectId;
     likes: mongoose.Types.ObjectId[];
-    images: string[];
     createdAt: Date;
     updatedAt: Date;
     encryptContent(): void;
-    decryptContent(): void;
 }
 
 const postSchema = new mongoose.Schema({
@@ -29,9 +30,6 @@ const postSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
     }],
-    images: [{
-        type: String
-    }]
 }, {
     timestamps: true
 });
@@ -50,27 +48,27 @@ postSchema.methods.encryptContent = function () {
 };
 
 // Method to decrypt content
-postSchema.methods.decryptContent = function () {
-    try {
-        const bytes = crypto.AES.decrypt(this.content, ENCRYPTION_KEY);
-        this.content = bytes.toString(crypto.enc.Utf8);
-    } catch (error) {
-        console.error('Failed to decrypt post content:', error);
-    }
-};
+// postSchema.methods.decryptContent = function () {
+//     try {
+//         const bytes = crypto.AES.decrypt(this.content, ENCRYPTION_KEY);
+//         this.content = bytes.toString(crypto.enc.Utf8);
+//     } catch (error) {
+//         console.error('Failed to decrypt post content:', error);
+//     }
+// };
 
 // Transform the document before sending to frontend
-postSchema.set('toJSON', {
-    transform: function (doc, ret) {
-        try {
-            const bytes = crypto.AES.decrypt(ret.content, ENCRYPTION_KEY);
-            ret.content = bytes.toString(crypto.enc.Utf8);
-        } catch (error) {
-            console.error('Failed to decrypt post content:', error);
-            ret.content = '[Encrypted Content]';
-        }
-        return ret;
-    }
-});
+// postSchema.set('toJSON', {
+//     transform: function (doc, ret) {
+//         try {
+//             const bytes = crypto.AES.decrypt(ret.content, ENCRYPTION_KEY);
+//             ret.content = bytes.toString(crypto.enc.Utf8);
+//         } catch (error) {
+//             console.error('Failed to decrypt post content:', error);
+//             ret.content = '[Encrypted Content]';
+//         }
+//         return ret;
+//     }
+// });
 
 export default mongoose.model<IPost>('Post', postSchema); 

@@ -8,45 +8,49 @@ import fs from 'fs';
 const router = express.Router();
 
 // Configure multer for file uploads
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        const uploadDir = 'uploads/posts';
-        if (!fs.existsSync(uploadDir)) {
-            fs.mkdirSync(uploadDir, { recursive: true });
-        }
-        cb(null, uploadDir);
-    },
-    filename: (req, file, cb) => {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, uniqueSuffix + path.extname(file.originalname));
-    }
-});
+// const storage = multer.diskStorage({
+//     destination: (req, file, cb) => {
+//         const uploadDir = 'uploads/posts';
+//         if (!fs.existsSync(uploadDir)) {
+//             fs.mkdirSync(uploadDir, { recursive: true });
+//         }
+//         cb(null, uploadDir);
+//     },
+//     filename: (req, file, cb) => {
+//         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+//         cb(null, uniqueSuffix + path.extname(file.originalname));
+//     }
+// });
 
-const upload = multer({
-    storage,
-    limits: {
-        fileSize: 5 * 1024 * 1024 // 5MB limit
-    },
-    fileFilter: (req, file, cb) => {
-        const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
-        if (allowedTypes.includes(file.mimetype)) {
-            cb(null, true);
-        } else {
-            cb(new Error('Invalid file type. Only JPEG, PNG and GIF are allowed.'));
-        }
-    }
-});
+// const upload = multer({
+//     storage,
+//     limits: {
+//         fileSize: 5 * 1024 * 1024 // 5MB limit
+//     },
+//     fileFilter: (req, file, cb) => {
+//         const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+//         if (allowedTypes.includes(file.mimetype)) {
+//             cb(null, true);
+//         } else {
+//             cb(new Error('Invalid file type. Only JPEG, PNG and GIF are allowed.'));
+//         }
+//     }
+// });
 
 // Create a new post
-router.post('/', authenticateToken, upload.array('images', 4), async (req: UserRequest, res: Response) => {
+
+
+
+// Add a new post
+router.post('/', authenticateToken, async (req: UserRequest, res: Response) => {
     try {
         const { content } = req.body;
-        const images = req.files ? (req.files as Express.Multer.File[]).map(file => file.path) : [];
+        // const images = req.files ? (req.files as Express.Multer.File[]).map(file => file.path) : [];
 
         const post = new Post({
             content,
             author: req.user!._id,
-            images
+            // images
         });
 
         await post.save();
@@ -67,7 +71,9 @@ router.get('/', authenticateToken, async (req: Request, res: Response) => {
         const posts = await Post.find()
             .sort({ createdAt: -1 })
             .populate('author', 'name email')
-            .populate('likes', 'name');
+            .populate('likes', 'name')
+
+
         res.json(posts);
     } catch (error: unknown) {
         if (error instanceof Error) {
@@ -79,20 +85,15 @@ router.get('/', authenticateToken, async (req: Request, res: Response) => {
 });
 
 // Like a post
-router.post('/:id/like', authenticateToken, async (req: UserRequest, res: Response) => {
+router.post('/:postId/like', authenticateToken, async (req: UserRequest, res: Response) => {
     try {
         const user = req.user!
-        const post = await Post.findById(req.params.id);
-        if (!post) {
-            return res.status(404).json({ message: 'Post not found' });
-        }
+        const post = await Post.findById(req.params.postId);
+        if (!post) return res.status(404).json({ message: 'Post not found' });
 
         const likeIndex = post.likes.findIndex(likeId => likeId.equals(user._id));
-        if (likeIndex === -1) {
-            post.likes.push(user._id);
-        } else {
-            post.likes.splice(likeIndex, 1);
-        }
+        if (likeIndex === -1) post.likes.push(user._id);
+        else post.likes.splice(likeIndex, 1);
 
         await post.save();
         const populatedPost = await post.populate('author', 'name email');

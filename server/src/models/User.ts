@@ -7,7 +7,6 @@ export interface IUser extends mongoose.Document {
     email: string;
     name: string;
     password: string;
-    profilePicture?: string;
     createdAt: Date;
     updatedAt: Date;
     comparePassword(candidatePassword: string): boolean;
@@ -30,10 +29,6 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    profilePicture: {
-        type: String,
-        default: ''
-    }
 }, {
     timestamps: true
 });

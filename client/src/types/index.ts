@@ -1,22 +1,19 @@
 export interface User {
-    id: string;
+    _id: string;
     name: string;
     email: string;
-    profilePicture?: string;
 }
 
 export interface Post {
-    id: string;
+    _id: string;
     content: string;
-    encryptedContent?: string;
-    images?: string[];
     author: {
         id: string;
         name: string;
         email: string;
     };
     createdAt: string;
-    likes: string[];
+    likes: { name: string, _id: string }[];
     likeCount: number;
 }
 
@@ -33,20 +30,17 @@ export interface LoginCredentials {
 
 export interface RegisterCredentials extends LoginCredentials {
     name: string;
-    profilePicture?: File;
 }
 
 export interface UpdateProfileData {
     [key: string]: unknown;
     name?: string;
     email?: string;
-    profilePicture?: File;
 }
 
 export interface CreatePostData {
     [key: string]: unknown;
     content: string;
-    images?: File[];
     author: {
         id: string;
         name: string;

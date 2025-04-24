@@ -12,7 +12,12 @@ export interface UserRequest extends Request {
 
 export const authenticateToken = async (req: UserRequest, res: Response, next: NextFunction) => {
     try {
-        const token = req.headers.authorization?.split(' ')[1];
+        const tokenHeader = req.headers.authorization?.split(' ');
+        if (!tokenHeader || tokenHeader[0] !== 'Bearer') {
+            return res.status(401).json({ message: 'Invalid Token' });
+        }
+
+        const token = tokenHeader[1]
         if (!token) {
             return res.status(401).json({ message: 'No token provided' });
         }
@@ -24,31 +29,17 @@ export const authenticateToken = async (req: UserRequest, res: Response, next: N
             return res.status(401).json({ message: 'User not found' });
         }
 
-        (req as UserRequest).user = {
+        req.user = {
             _id: user._id as Types.ObjectId,
             name: user.name
         };
         next();
     } catch (error) {
         if (error instanceof jwt.JsonWebTokenError) {
+            if (error.message === "jwt expired") return res.status(401).json({ message: 'Token expired' });
             return res.status(401).json({ message: 'Invalid token' });
         }
         res.status(500).json({ message: 'Server error' });
     }
 };
 
-export const generateTokens = (userId: string) => {
-    const accessToken = jwt.sign(
-        { _id: userId },
-        process.env.JWT_SECRET || 'your-secret-key',
-        { expiresIn: '15m' }
-    );
-
-    const refreshToken = jwt.sign(
-        { _id: userId },
-        process.env.JWT_REFRESH_SECRET || 'your-refresh-secret-key',
-        { expiresIn: '7d' }
-    );
-
-    return { accessToken, refreshToken };
-}; 
