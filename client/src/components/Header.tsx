@@ -19,6 +19,14 @@ const Header = () => {
           <nav className='flex items-center space-x-6'>
             {user ? (
               <>
+                {user.role === "admin" && (
+                  <Link
+                    to='/admin'
+                    className='text-gray-600 hover:text-primary-600 transition-all duration-200 font-medium px-3 py-2 rounded-md hover:bg-gray-50'
+                  >
+                    Admin Dashboard
+                  </Link>
+                )}
                 <Link
                   to='/profile'
                   className='text-gray-600 hover:text-primary-600 transition-all duration-200 font-medium px-3 py-2 rounded-md hover:bg-gray-50'

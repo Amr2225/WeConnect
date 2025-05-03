@@ -1,27 +1,13 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-import { useAuth } from "./contexts/useAuth";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { lazy, Suspense } from "react";
-
+import { AuthGuard } from "./components/AuthGuard";
 import Header from "./components/Header";
 
 const Login = lazy(() => import("./pages/Login"));
 const Register = lazy(() => import("./pages/Register"));
 const Home = lazy(() => import("./pages/Home"));
 const Profile = lazy(() => import("./pages/Profile"));
-
-const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user, loading } = useAuth();
-
-  if (loading) {
-    return <div className='flex items-center justify-center min-h-screen'>Loading...</div>;
-  }
-
-  if (!user) {
-    return <Navigate to='/login' />;
-  }
-
-  return <>{children}</>;
-};
+const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 
 function App() {
   return (
@@ -48,17 +34,25 @@ function App() {
               <Route
                 path='/'
                 element={
-                  <PrivateRoute>
+                  <AuthGuard>
                     <Home />
-                  </PrivateRoute>
+                  </AuthGuard>
                 }
               />
               <Route
                 path='/profile'
                 element={
-                  <PrivateRoute>
+                  <AuthGuard>
                     <Profile />
-                  </PrivateRoute>
+                  </AuthGuard>
+                }
+              />
+              <Route
+                path='/admin'
+                element={
+                  <AuthGuard requireAdmin>
+                    <AdminDashboard />
+                  </AuthGuard>
                 }
               />
             </Routes>

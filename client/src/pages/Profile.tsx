@@ -1,29 +1,28 @@
 import { useState } from "react";
 import { useAuth } from "../contexts/useAuth";
-import { updateProfile } from "../services/authService";
+import { updateProfile, UpdateProfileData } from "../services/authService";
 import { useMutation } from "@tanstack/react-query";
-// import { UpdateProfileData } from "../types";
+import { toast } from "sonner";
 
 const Profile = () => {
   const { user } = useAuth();
 
-  const [name, setName] = useState(user?.name);
-  const [email, setEmail] = useState(user?.email);
+  const [name, setName] = useState(user?.name ?? "");
+  const [email, setEmail] = useState(user?.email ?? "");
 
   const { mutate: updateProfileMutation, isPending } = useMutation({
-    mutationFn: (formData: FormData) => updateProfile(formData),
+    mutationFn: (data: UpdateProfileData) => updateProfile(data),
     onSuccess: () => {
-      console.log("Updated");
+      toast.success("Profile updated successfully");
+    },
+    onError: (error) => {
+      toast.error(error.message || "Failed to update profile");
     },
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const formData = new FormData();
-    formData.append("name", name);
-    formData.append("email", email);
-
-    updateProfileMutation(formData);
+    updateProfileMutation({ name, email });
   };
 
   if (!user) {

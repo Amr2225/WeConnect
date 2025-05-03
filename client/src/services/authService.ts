@@ -37,13 +37,14 @@ export const register = async (credentials: RegisterCredentials): Promise<AuthRe
     }
 };
 
-export const updateProfile = async (formData: FormData): Promise<User> => {
+export interface UpdateProfileData {
+    name: string;
+    email: string;
+}
+
+export const updateProfile = async (data: UpdateProfileData): Promise<User> => {
     try {
-        const response = await api.patch('users/me', formData, {
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        });
+        const response = await api.patch('users/me', data);
         return response.data;
     } catch (error) {
         if (axios.isAxiosError(error)) {
