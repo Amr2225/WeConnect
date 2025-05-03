@@ -5,6 +5,7 @@ import { config } from 'dotenv';
 import authRoutes from './routes/auth';
 import postRoutes from './routes/posts';
 import userRoutes from './routes/users';
+import adminRoutes from './routes/admin';
 import { connectDB } from './utils/db';
 config();
 
@@ -26,7 +27,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/api/auth', authRoutes);
 app.use('/api/posts', postRoutes);
 app.use('/api/users', userRoutes);
-
+app.use('/api/admin', adminRoutes);
 
 // Start server
 const PORT = process.env.PORT || 5000;

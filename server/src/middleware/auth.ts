@@ -7,6 +7,7 @@ export interface UserRequest extends Request {
     user?: {
         _id: Types.ObjectId;
         name: string;
+        role: "user" | "admin";
     };
 }
 
@@ -31,7 +32,8 @@ export const authenticateToken = async (req: UserRequest, res: Response, next: N
 
         req.user = {
             _id: user._id as Types.ObjectId,
-            name: user.name
+            name: user.name,
+            role: user?.role ?? "user"
         };
         next();
     } catch (error) {
@@ -42,4 +44,11 @@ export const authenticateToken = async (req: UserRequest, res: Response, next: N
         res.status(500).json({ message: 'Server error' });
     }
 };
+
+export const adminAuthorization = (req: UserRequest, res: Response, next: NextFunction) => {
+    if (req.user?.role !== "admin") {
+        return res.status(403).json({ message: 'Access denied. Admin only.' });
+    }
+    next();
+}
 

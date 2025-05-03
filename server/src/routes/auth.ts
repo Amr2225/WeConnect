@@ -25,7 +25,7 @@ router.post('/register', async (req: UserRequest, res: Response) => {
         });
 
         await user.save();
-        const tokens = generateTokens(user._id.toString());
+        const tokens = generateTokens(user._id.toString(), user?.role ?? "user");
 
         res.status(201).json({
             user: {
@@ -50,13 +50,14 @@ router.post('/login', async (req: UserRequest, res: Response) => {
             return res.status(401).json({ error: 'Invalid credentials' });
         }
 
-        const tokens = generateTokens(user._id.toString());
+        const tokens = generateTokens(user._id.toString(), user?.role ?? "user");
 
         res.json({
             user: {
                 _id: user._id,
                 email: user.email,
                 name: user.name,
+                role: user?.role ?? "user",
             },
             ...tokens
         });
@@ -71,11 +72,11 @@ router.post('/refresh', async (req: Request, res: Response) => {
         const { refreshToken } = req.body;
         const decoded = jwt.verify(
             refreshToken,
-            process.env.JWT_REFRESH_SECRET || 'your-refresh-secret-key'
+            process.env.JWT_REFRESH_SECRET as string
         );
 
-        const tokens = generateTokens((decoded as any)._id);
-        res.json(tokens);
+        const tokens = generateTokens((decoded as any)._id, (decoded as any).role);
+        res.json({ accessToken: tokens.accessToken });
     } catch (error) {
         res.status(401).json({ error: 'Invalid refresh token' });
     }

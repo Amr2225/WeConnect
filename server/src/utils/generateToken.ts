@@ -6,15 +6,15 @@ if (!process.env.JWT_SECRET || !process.env.JWT_REFRESH_SECRET) {
     throw new Error('JWT_SECRET and JWT_REFRESH_SECRET must be defined in the environment variables');
 }
 
-export const generateTokens = (userId: string) => {
+export const generateTokens = (userId: string, role: string) => {
     const accessToken = jwt.sign(
-        { _id: userId },
+        { _id: userId, role: role },
         process.env.JWT_SECRET as string,
         { expiresIn: '1m' }
     );
 
     const refreshToken = jwt.sign(
-        { _id: userId },
+        { _id: userId, role: role },
         process.env.JWT_REFRESH_SECRET as string,
         { expiresIn: '2m' }
     );
